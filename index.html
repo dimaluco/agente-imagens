@@ -479,12 +479,12 @@ const NICHES = {
     label:"Conceitos emocionais & bem-estar",
     concept:"Mental Wellness Concept",
     subjects:[
-      "a person sitting alone by a window watching gentle rain",
-      "a tangled ball of glowing yarn slowly being untangled by a hand",
-      "a small green plant growing through a crack in grey concrete",
-      "a person carrying a heavy backpack shaped like storm clouds",
-      "two hands reaching toward each other across a gap of light",
-      "a lighthouse glowing softly on a calm dark shore"
+      "a glowing window with raindrops on the glass and soft light inside, cozy atmosphere",
+      "a tangled ball of glowing yarn with loose threads slowly unraveling on their own",
+      "a small green plant growing through a crack in grey concrete in warm sunlight",
+      "a single heavy storm cloud floating low with a beam of light breaking through",
+      "two glowing orbs drifting toward each other across a dark space filled with light particles",
+      "a lone lighthouse glowing softly on a calm dark shore under a starry sky"
     ],
     styles:[
       "soft watercolor illustration with visible paper texture",
@@ -569,12 +569,12 @@ const NICHES = {
     label:"Tecnologia & IA conceitual",
     concept:"Technology Concept",
     subjects:[
-      "a glowing neural network shaped like a tree of light",
-      "a human hand reaching toward a holographic interface",
-      "an abstract network of connected glowing nodes",
-      "a futuristic workspace with floating data screens",
-      "a digital brain made of light particles dissolving into data",
-      "a city skyline made of glowing circuit board patterns"
+      "a glowing neural network shaped like a tree of light on a dark background",
+      "a holographic interface with glowing data panels floating in a dark digital space",
+      "an abstract network of connected glowing nodes spreading across a dark background",
+      "a futuristic workspace with floating holographic data screens and soft blue light",
+      "a digital brain made of glowing light particles dissolving into streams of data",
+      "a city skyline made of glowing circuit board patterns at night"
     ],
     styles:[
       "clean 3D render with soft gradients",
@@ -614,12 +614,12 @@ const NICHES = {
     label:"Estilo de vida & rotinas autênticas",
     concept:"Lifestyle Concept",
     subjects:[
-      "a person journaling with a cup of coffee at a sunlit table",
-      "hands kneading dough on a flour dusted kitchen counter",
-      "a person stretching near a window in the early morning",
-      "a simple desk setup with a notebook, plant and warm light",
-      "a close-up of hands holding a warm mug near a window",
-      "a person reading a book on a cozy sofa by a lamp"
+      "an open journal with a pen beside a steaming coffee cup on a sunlit wooden table",
+      "a flour-dusted kitchen counter with bread dough and a rolling pin in warm light",
+      "a yoga mat unrolled near a window with morning sunlight streaming in",
+      "a minimalist desk with an open notebook, a small plant and a warm lamp",
+      "a ceramic mug with steam rising placed near a rainy window on a wooden surface",
+      "an open book face down on a cozy sofa beside a warm reading lamp"
     ],
     styles:[
       "natural light lifestyle photography style",
@@ -733,7 +733,7 @@ function buildPromptText(item, tool){
   const cap = capFirst(item.subject);
   const [ratio, w, h, desc] = item.aspect;
   // Sufixo de qualidade e anatomia — aplicado a todos os prompts do Pollinations
-  const qualitySuffix = "perfect anatomy, perfect hands, correct fingers, five fingers, high quality, sharp, 8k, professional stock photo, no text, no watermark, no logo";
+  const qualitySuffix = "no people, no hands, no fingers, no human body parts, high quality, sharp focus, 8k, professional stock photo, no text, no watermark, no logo";
   if(tool==="aistudio"){
     // Pollinations.ai (Flux) — prompt direto e descritivo com qualidade máxima
     return `${cap}. Style: ${item.style}. Lighting: ${item.lighting}. Color palette: ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. ${qualitySuffix}.`;
