@@ -372,26 +372,12 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
     </div>
   </div>
   <div class="card" style="margin-top:16px;border-color:var(--accent);">
-    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — API Hugging Face (gratuita)</div>
-    <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;">Cole sua chave gratuita do Hugging Face e o agente gera todas as imagens do lote automaticamente, exibindo cada uma com botão de download. Sem abrir outra aba, sem copiar prompt por prompt.</p>
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent-2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
-      <b style="color:var(--text);">Como obter a chave gratuita (1 minuto):</b><br>
-      1. Acesse <a href="https://huggingface.co/join" target="_blank" style="color:var(--accent);">huggingface.co/join</a> e crie uma conta gratuita<br>
-      2. Vá em <a href="https://huggingface.co/settings/tokens" target="_blank" style="color:var(--accent);">huggingface.co/settings/tokens</a> → clique em <b style="color:var(--text);">"New token"</b><br>
-      3. Escolha tipo <b style="color:var(--text);">Read</b>, dê um nome qualquer, clique em <b style="color:var(--text);">"Create token"</b><br>
-      4. Copie o token (começa com <b style="color:var(--text);">hf_...</b>) e cole abaixo<br>
-      <span style="color:var(--text-muted);font-size:11.5px;margin-top:4px;display:block;">Modelo usado: <b style="color:var(--text);">SDXL (Stable Diffusion XL)</b> — gera em 1024px. Após Upscayl 4× → 4096px (16MP) → passa no Adobe Stock com folga.</span>
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — Pollinations.ai (sem cadastro, sem token)</div>
+    <p style="font-size:13px;color:var(--text-muted);margin:0 0 8px;">A geração de imagens acontece automaticamente ao clicar no botão na seção 02. Não precisa de conta, token ou cadastro — funciona em qualquer rede, direto do navegador.</p>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--success);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);">
+      <b style="color:var(--success);">✅ Sem configuração necessária</b> — clique em "Gerar lote" na seção acima e depois em "⚡ Gerar todas as imagens" na seção 02. As imagens aparecem direto no agente com botão de download.<br>
+      <span style="font-size:11.5px;margin-top:4px;display:block;">Resolução de saída: de acordo com a proporção do lote · Após Upscayl 4× passa no Adobe Stock com folga.</span>
     </div>
-    <div class="grid cols-2">
-      <div class="field" style="margin-bottom:0;">
-        <label for="hfKey">Token Hugging Face</label>
-        <input type="password" id="hfKey" placeholder="hf_..." oninput="salvarChaveHF(this.value)">
-      </div>
-      <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end;gap:8px;">
-        <button class="btn secondary small" onclick="toggleHFKey()" style="height:42px;">Mostrar/Ocultar</button>
-      </div>
-    </div>
-    <div class="helper" id="hfKeyHelper" style="margin-top:8px;"></div>
   </div>
 </section>
 
@@ -1030,67 +1016,20 @@ function toggleHFKey(){
   if(inp) inp.type = inp.type==="password" ? "text" : "password";
 }
 
-/* ---------- Geração automática via Hugging Face (SDXL) ---------- */
-async function callHFImage(token, prompt, width, height){
-  // Modelos em ordem de tentativa — do mais confiável no free tier ao backup
-  const models = [
-    "stabilityai/stable-diffusion-2-1",
-    "runwayml/stable-diffusion-v1-5",
-    "CompVis/stable-diffusion-v1-4"
-  ];
+/* ---------- Geração automática via Pollinations.ai (sem token, sem CORS) ---------- */
+async function callPollinationsImage(prompt, width, height){
+  const encodedPrompt = encodeURIComponent(prompt);
+  const seed = Math.floor(Math.random() * 999999);
+  const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
 
-  let lastError = "";
-  for(const model of models){
-    try{
-      const controller = new AbortController();
-      const timeout = setTimeout(()=>controller.abort(), 60000); // 60s timeout
-      const resp = await fetch(
-        `https://api-inference.huggingface.co/models/${model}`,
-        {
-          method:"POST",
-          headers:{"Authorization":`Bearer ${token}`,"Content-Type":"application/json"},
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters:{ num_inference_steps:25, guidance_scale:7.5 }
-          }),
-          signal: controller.signal
-        }
-      );
-      clearTimeout(timeout);
-
-      if(resp.status===503){
-        // Modelo carregando — tenta o próximo
-        lastError = `Modelo ${model} inicializando, tentando próximo...`;
-        continue;
-      }
-      if(resp.status===401) throw new Error("Token inválido ou sem permissão — verifique o token hf_...");
-      if(!resp.ok){
-        const txt = await resp.text().catch(()=>"");
-        let msg = `Erro HTTP ${resp.status}`;
-        try{ const j=JSON.parse(txt); msg=j.error||msg; }catch(e){}
-        lastError = msg;
-        continue;
-      }
-      const blob = await resp.blob();
-      if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada — tente novamente");
-      return URL.createObjectURL(blob);
-    } catch(e){
-      if(e.name==="AbortError"){ lastError="Tempo limite excedido (60s) — tente novamente"; continue; }
-      if(e.message.includes("Token inválido")) throw e;
-      lastError = e.message;
-      continue;
-    }
-  }
-  throw new Error(lastError || "Todos os modelos falharam — verifique seu token e tente novamente");
+  const resp = await fetch(url, { method:"GET" });
+  if(!resp.ok) throw new Error(`Erro HTTP ${resp.status} — tente novamente`);
+  const blob = await resp.blob();
+  if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada — tente novamente");
+  return URL.createObjectURL(blob);
 }
 
 async function gerarTodasImagens(){
-  const token = (localStorage.getItem("hfApiKey")||"").trim();
-  if(!token){
-    alert("Cole seu token do Hugging Face na seção 01 antes de gerar.");
-    document.getElementById("hfKey")?.focus();
-    return;
-  }
   if(currentBatch.length===0){ alert("Gere um lote primeiro (seção 01)."); return; }
 
   const btn = document.getElementById("btnGerarImagens");
@@ -1112,14 +1051,14 @@ async function gerarTodasImagens(){
 
     const [ratio,w,h] = item.aspect;
     statusEl.className="img-status spin";
-    statusEl.textContent=`Gerando ${item.id}/${currentBatch.length}...`;
+    statusEl.textContent=`Gerando ${item.id} de ${currentBatch.length}...`;
     batchStatus.textContent=`Imagem ${i+1} de ${currentBatch.length} — aguarde...`;
 
     try{
-      const objUrl = await callHFImage(token, item.prompt, w, h);
+      const objUrl = await callPollinationsImage(item.prompt, w, h);
       slotEl.innerHTML="";
       const img=document.createElement("img");
-      img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);";
+      img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);margin-bottom:8px;";
       slotEl.appendChild(img);
       const a=document.createElement("a");
       a.href=objUrl; a.download=`img_lote_${item.id}.png`;
@@ -1127,7 +1066,7 @@ async function gerarTodasImagens(){
       slotEl.appendChild(a);
       const note=document.createElement("div");
       note.style.cssText="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);";
-      note.textContent="✓ Gerada — faça upscale 4× no Upscayl antes do upload no Adobe Stock";
+      note.textContent="✓ Gerada — faça upscale 4× no Upscayl antes do upload";
       slotEl.appendChild(note);
       statusEl.className="img-status ok";
       statusEl.textContent=`✓ Imagem ${item.id} pronta`;
@@ -1140,16 +1079,14 @@ async function gerarTodasImagens(){
     }
 
     progressBar.style.width=`${Math.round(((i+1)/currentBatch.length)*100)}%`;
-    if(i<currentBatch.length-1) await new Promise(r=>setTimeout(r,1000));
+    if(i<currentBatch.length-1) await new Promise(r=>setTimeout(r,1500));
   }
 
   btn.disabled=false; btn.textContent="⚡ Gerar novamente";
-  batchStatus.textContent=`Concluído: ${ok} geradas${fail>0?`, ${fail} com erro — clique em "Tentar novamente" em cada uma`:""}. Faça upscale 4× no Upscayl antes do upload.`;
+  batchStatus.textContent=`Concluído: ${ok} geradas${fail>0?`, ${fail} com erro — clique em "Tentar novamente"`:""}. Faça upscale 4× no Upscayl antes do upload.`;
 }
 
 async function regenarImagem(id){
-  const token = (localStorage.getItem("hfApiKey")||"").trim();
-  if(!token){ alert("Token HF não encontrado."); return; }
   const item = currentBatch.find(x=>x.id===id);
   if(!item) return;
   const statusEl=document.getElementById(`imgStatus_${id}`);
@@ -1158,10 +1095,10 @@ async function regenarImagem(id){
   slotEl.innerHTML="";
   const [ratio,w,h]=item.aspect;
   try{
-    const objUrl=await callHFImage(token,item.prompt,w,h);
+    const objUrl=await callPollinationsImage(item.prompt,w,h);
     slotEl.innerHTML="";
     const img=document.createElement("img");
-    img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);";
+    img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);margin-bottom:8px;";
     slotEl.appendChild(img);
     const a=document.createElement("a");
     a.href=objUrl; a.download=`img_lote_${id}.png`; a.className="dl-link"; a.textContent=`⬇ Baixar imagem ${id}`;
