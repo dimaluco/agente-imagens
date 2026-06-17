@@ -1032,42 +1032,56 @@ function toggleHFKey(){
 
 /* ---------- Geração automática via Hugging Face (SDXL) ---------- */
 async function callHFImage(token, prompt, width, height){
-  // SDXL suporta múltiplas resoluções — mapeamos para as mais próximas suportadas
-  const supportedSizes = [
-    [1024,1024],[1152,896],[896,1152],[1216,832],[832,1216],[1344,768],[768,1344],[1536,640],[640,1536]
+  // Modelos em ordem de tentativa — do mais confiável no free tier ao backup
+  const models = [
+    "stabilityai/stable-diffusion-2-1",
+    "runwayml/stable-diffusion-v1-5",
+    "CompVis/stable-diffusion-v1-4"
   ];
-  // Escolhe o tamanho suportado com proporção mais próxima
-  const targetRatio = width/height;
-  let best = supportedSizes[0];
-  let bestDiff = Math.abs(best[0]/best[1] - targetRatio);
-  for(const [w,h] of supportedSizes){
-    const diff = Math.abs(w/h - targetRatio);
-    if(diff < bestDiff){ bestDiff=diff; best=[w,h]; }
-  }
-  const [sw,sh] = best;
 
-  const resp = await fetch(
-    "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-    {
-      method:"POST",
-      headers:{"Authorization":`Bearer ${token}`,"Content-Type":"application/json"},
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters:{ width:sw, height:sh, num_inference_steps:30, guidance_scale:7.5 }
-      })
+  let lastError = "";
+  for(const model of models){
+    try{
+      const controller = new AbortController();
+      const timeout = setTimeout(()=>controller.abort(), 60000); // 60s timeout
+      const resp = await fetch(
+        `https://api-inference.huggingface.co/models/${model}`,
+        {
+          method:"POST",
+          headers:{"Authorization":`Bearer ${token}`,"Content-Type":"application/json"},
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters:{ num_inference_steps:25, guidance_scale:7.5 }
+          }),
+          signal: controller.signal
+        }
+      );
+      clearTimeout(timeout);
+
+      if(resp.status===503){
+        // Modelo carregando — tenta o próximo
+        lastError = `Modelo ${model} inicializando, tentando próximo...`;
+        continue;
+      }
+      if(resp.status===401) throw new Error("Token inválido ou sem permissão — verifique o token hf_...");
+      if(!resp.ok){
+        const txt = await resp.text().catch(()=>"");
+        let msg = `Erro HTTP ${resp.status}`;
+        try{ const j=JSON.parse(txt); msg=j.error||msg; }catch(e){}
+        lastError = msg;
+        continue;
+      }
+      const blob = await resp.blob();
+      if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada — tente novamente");
+      return URL.createObjectURL(blob);
+    } catch(e){
+      if(e.name==="AbortError"){ lastError="Tempo limite excedido (60s) — tente novamente"; continue; }
+      if(e.message.includes("Token inválido")) throw e;
+      lastError = e.message;
+      continue;
     }
-  );
-  if(!resp.ok){
-    const txt = await resp.text().catch(()=>"");
-    let msg = `Erro HTTP ${resp.status}`;
-    try{ const j=JSON.parse(txt); msg=j.error||msg; }catch(e){}
-    // Modelo carregando (503)
-    if(resp.status===503) throw new Error("Modelo inicializando (aguarde ~20s e tente novamente)");
-    throw new Error(msg);
   }
-  const blob = await resp.blob();
-  if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada da API — tente novamente");
-  return URL.createObjectURL(blob);
+  throw new Error(lastError || "Todos os modelos falharam — verifique seu token e tente novamente");
 }
 
 async function gerarTodasImagens(){
