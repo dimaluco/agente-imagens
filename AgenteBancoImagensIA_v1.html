@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente Banco de Imagens IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14161b;
+  --surface:#1d2027;
+  --surface-2:#262a33;
+  --border:#383d48;
+  --text:#ece8e1;
+  --text-muted:#9298a6;
+  --accent:#e0a458;
+  --accent-2:#5b9aa6;
+  --success:#7fb88a;
+  --danger:#d4756a;
+  --radius:10px;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.55;
+}
+a{color:var(--accent);}
+header{
+  border-bottom:1px solid var(--border);
+  padding:28px 20px 22px;
+  background:linear-gradient(180deg,#1a1d24,#14161b);
+}
+header .wrap{max-width:880px;margin:0 auto;}
+h1{
+  font-family:var(--font-display);
+  font-size:28px;
+  margin:0 0 6px;
+  letter-spacing:0.5px;
+}
+h1 span{color:var(--accent);}
+header p{margin:0;color:var(--text-muted);font-size:14.5px;max-width:640px;}
+nav.sections{
+  max-width:880px;margin:18px auto 0;
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:0 20px;
+}
+nav.sections a{
+  font-family:var(--font-mono);
+  font-size:12px;
+  text-decoration:none;
+  color:var(--text-muted);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:6px 14px;
+  transition:all .15s ease;
+}
+nav.sections a:hover{border-color:var(--accent);color:var(--accent);}
+main{max-width:880px;margin:0 auto;padding:0 20px 80px;}
+section{padding:36px 0;border-bottom:1px solid var(--border);}
+section:last-child{border-bottom:none;}
+section h2{
+  font-family:var(--font-display);
+  font-size:20px;
+  margin:0 0 4px;
+  display:flex;align-items:center;gap:10px;
+}
+section h2 .num{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:6px;
+  padding:2px 7px;
+}
+section .desc{color:var(--text-muted);font-size:14px;margin:6px 0 22px;max-width:640px;}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.grid{display:grid;gap:14px;}
+.grid.cols-2{grid-template-columns:1fr 1fr;}
+.grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+@media (max-width:680px){
+  .grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}
+}
+label{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:6px;font-weight:500;}
+select,input[type=number],input[type=date],input[type=text],textarea{
+  width:100%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  padding:10px 12px;
+  font-family:var(--font-body);
+  font-size:14px;
+}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--accent-2);outline-offset:1px;}
+textarea{resize:vertical;min-height:80px;font-family:var(--font-mono);font-size:13px;}
+.field{margin-bottom:14px;}
+.btn{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:14px;
+  border:none;
+  border-radius:8px;
+  padding:11px 22px;
+  cursor:pointer;
+  background:var(--accent);
+  color:#1a1407;
+  transition:transform .1s ease,opacity .15s ease;
+}
+.btn:hover{opacity:.9;}
+.btn:active{transform:scale(.98);}
+.btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+.btn.small{padding:6px 12px;font-size:12px;border-radius:6px;}
+.helper{font-size:12px;color:var(--text-muted);margin-top:4px;}
+/* Frame card (signature element) */
+.frame-card{
+  display:flex;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-bottom:16px;
+  background:var(--surface);
+}
+.frame-strip{
+  width:34px;
+  flex-shrink:0;
+  background-color:var(--surface-2);
+  background-image:radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
+  background-size:100% 20px;
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:14px;
+}
+.frame-strip span{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--accent);
+  background:var(--bg);
+  border-radius:4px;
+  padding:2px 4px;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  margin-top:6px;
+}
+.frame-body{padding:18px 20px;flex:1;min-width:0;}
+.frame-meta{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-muted);
+  margin-bottom:12px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+.frame-meta b{color:var(--accent-2);}
+.codebox{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--text);
+  word-break:break-word;
+}
+.codebox .txt{flex:1;}
+.copy-btn{
+  flex-shrink:0;
+  font-family:var(--font-body);
+  font-size:11.5px;
+  font-weight:600;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--text-muted);
+  border-radius:6px;
+  padding:5px 10px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+/* Checklist */
+.checklist{list-style:none;margin:0;padding:0;}
+.checklist li{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 0;border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.checklist li:last-child{border-bottom:none;}
+.checklist input[type=checkbox]{
+  margin-top:3px;width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;
+}
+.checklist .lbl b{color:var(--accent);}
+/* Tracker */
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px;}
+th,td{border-bottom:1px solid var(--border);text-align:left;padding:8px 8px;}
+th{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+td.actions{text-align:right;white-space:nowrap;}
+.badge{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;
+  padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--text-muted);
+}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.stats .badge{color:var(--text);}
+.empty-row td{color:var(--text-muted);font-style:italic;}
+.note{
+  background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text-muted);margin-bottom:18px;
+}
+.note b{color:var(--text);}
+hr.thin{border:none;border-top:1px solid var(--border);margin:22px 0;}
+/* Geração automática */
+.img-slot{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.img-slot img{width:100%;border-radius:8px;display:block;border:1px solid var(--border);}
+.img-status{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:8px;}
+.img-status.ok{color:var(--success);}
+.img-status.err{color:var(--danger);}
+.img-status.spin::before{content:"⟳ ";}
+.progress-bar-wrap{background:var(--surface-2);border-radius:20px;height:6px;overflow:hidden;margin:10px 0;}
+.progress-bar{height:100%;background:var(--accent);border-radius:20px;transition:width .3s ease;width:0%;}
+.dl-link{display:inline-block;margin-top:8px;font-family:var(--font-display);font-weight:600;font-size:12px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 12px;text-decoration:none;cursor:pointer;}
+.dl-link:hover{border-color:var(--success);color:var(--success);}
+input[type=password]{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-family:var(--font-mono);font-size:13px;}
+input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Agente <span>Banco de Imagens IA</span></h1>
+    <p>Gere lotes de prompts, crie imagens automaticamente via API do Hugging Face (gratuita) e obtenha metadados completos em inglês para Adobe Stock e Shutterstock.</p>
+  </div>
+  <nav class="sections">
+    <a href="#gerar">01 Gerar lote</a>
+    <a href="#resultados">02 Resultados</a>
+    <a href="#checklist">03 Checklist de envio</a>
+    <a href="#painel">04 Painel de controle</a>
+  </nav>
+</header>
+
+<main>
+
+<section id="gerar">
+  <h2><span class="num">01</span> Gerar lote</h2>
+  <p class="desc">Escolha um nicho com demanda real (ou crie o seu), a ferramenta de geração de imagem e quantas variações quer produzir. O agente monta prompts diferentes entre si (assunto, estilo, luz, composição, paleta e proporção) para evitar imagens repetitivas — isso ajuda na aprovação e reduz risco de "spam" no envio.</p>
+
+  <div class="card">
+    <div class="grid cols-2">
+      <div class="field">
+        <label for="nicheSelect">Nicho</label>
+        <select id="nicheSelect" onchange="onNicheChange()">
+          <option value="emocional">Conceitos emocionais &amp; bem-estar (ilustração editorial)</option>
+          <option value="pets">Pets &amp; emoções (fotorrealista / lifestyle)</option>
+          <option value="tech">Tecnologia &amp; IA conceitual</option>
+          <option value="lifestyle">Estilo de vida &amp; rotinas autênticas</option>
+          <option value="textures">Texturas &amp; backgrounds sensoriais</option>
+          <option value="custom">Personalizado (eu defino os temas)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="toolSelect">Ferramenta de geração</label>
+        <select id="toolSelect">
+          <option value="aistudio">Hugging Face (SDXL) — automático via API · recomendado</option>
+          <option value="designer">Microsoft Designer — ~15 imagens/mês · manual</option>
+          <option value="ideogram">Ideogram 3.0 — 10 imagens/dia · manual</option>
+          <option value="firefly">Adobe Firefly — 5 imagens/dia · manual</option>
+          <option value="generic">Genérico (qualquer outra ferramenta)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" id="qtyField">
+      <label for="qtyInput">Quantidade de imagens no lote (máx. 12)</label>
+      <input type="number" id="qtyInput" min="1" max="12" value="8">
+    </div>
+
+    <div class="field" id="customField" style="display:none;">
+      <label for="customSubjects">Temas personalizados (um por linha — cada linha gera uma imagem)</label>
+      <textarea id="customSubjects" placeholder="ex: a vintage typewriter on a wooden desk near a window&#10;a cup of coffee steaming on a rainy day&#10;an old bicycle leaning against a brick wall"></textarea>
+      <div class="helper">Escreva os temas em inglês — é o idioma que os geradores de imagem e os bancos de imagem entendem melhor.</div>
+    </div>
+
+    <button class="btn" onclick="gerarLote()">Gerar lote</button>
+    <div class="helper" id="genHelper" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;">📐 Tamanhos — Microsoft Designer → Upscayl 4× → Adobe Stock</div>
+    <div style="overflow-x:auto;">
+      <table style="margin-top:0;font-size:13px;">
+        <thead>
+          <tr><th>Agente indica</th><th>Use no Designer</th><th>Após Upscayl 4×</th><th>Adobe Stock</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge">1:1</span> Quadrado</td>
+            <td style="color:var(--accent);">Quadrado (1024×1024)</td>
+            <td style="font-family:var(--font-mono);font-size:12px;">4096×4096 · 16MP</td>
+            <td style="color:var(--success);">✅ passa folgado</td>
+          </tr>
+          <tr>
+            <td><span class="badge">3:2</span> Paisagem</td>
+            <td style="color:var(--accent);">Paisagem (1536×1024)</td>
+            <td style="font-family:var(--font-mono);font-size:12px;">6144×4096 · 25MP</td>
+            <td style="color:var(--success);">✅ passa folgado</td>
+          </tr>
+          <tr>
+            <td><span class="badge">4:5</span> Retrato</td>
+            <td style="color:var(--accent);">Retrato (1024×1536)</td>
+            <td style="font-family:var(--font-mono);font-size:12px;">4096×6144 · 25MP</td>
+            <td style="color:var(--success);">✅ passa folgado</td>
+          </tr>
+          <tr>
+            <td><span class="badge">9:16</span> Vertical</td>
+            <td style="color:var(--accent);">Retrato (1024×1536)*</td>
+            <td style="font-family:var(--font-mono);font-size:12px;">4096×6144 · 25MP</td>
+            <td style="color:var(--success);">✅ passa folgado</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-muted);margin-top:8px;">* O Designer não tem opção 9:16 — use Retrato (1024×1536) que é o mais próximo disponível. Após o upscale 4× no Upscayl, todos os tamanhos passam com folga no mínimo de 4MP do Adobe Stock.</div>
+  </div>
+    <div style="margin-top:12px;display:grid;gap:6px;font-size:12px;color:var(--text-muted);">
+      <div><b style="color:var(--success)">✅ Microsoft Designer</b> — <a href="https://designer.microsoft.com" target="_blank" style="color:var(--accent)">designer.microsoft.com</a> · <b style="color:var(--text)">~15 imagens/dia grátis</b> · DALL-E 3 · Conta Microsoft · <b style="color:var(--danger)">Upscale obrigatório</b></div>
+      <div><b style="color:var(--success)">✅ Ideogram 3.0</b> — <a href="https://ideogram.ai" target="_blank" style="color:var(--accent)">ideogram.ai</a> · <b style="color:var(--text)">10 imagens/dia grátis</b> · Excelente para estilos artísticos e ilustração · <b style="color:var(--danger)">Upscale obrigatório</b></div>
+      <div><b style="color:var(--text-muted)">⚠️ Adobe Firefly</b> — <a href="https://firefly.adobe.com" target="_blank" style="color:var(--accent)">firefly.adobe.com</a> · <b style="color:var(--text)">apenas 5 imagens/dia grátis</b> · Conta Adobe (já tem!) · <b style="color:var(--danger)">Upscale obrigatório</b></div>
+      <div><b style="color:var(--text-muted)">⚠️ Google AI Studio</b> — <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a> · Interface web gratuita · Sem limite claro mas resolução baixa · <b style="color:var(--danger)">Upscale obrigatório</b></div>
+      <div style="margin-top:6px;padding:10px 12px;background:var(--surface-2);border-radius:8px;border-left:3px solid var(--danger);">
+        <b style="color:var(--danger);">🔍 Upscale é obrigatório para todas as ferramentas gratuitas.</b> <span style="color:var(--text-muted);">Use <a href="https://upscayl.org" target="_blank" style="color:var(--accent)">Upscayl</a> — app gratuito, open source, sem limite de imagens, sem conta, roda no seu computador (Windows/Mac/Linux). Instala uma vez, usa para sempre. Escolha 4× de ampliação antes de fazer o upload no Adobe Stock.</span>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;border-color:var(--accent-2);">
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:10px;color:var(--accent-2);letter-spacing:.5px;text-transform:uppercase;">💡 Fluxo recomendado</div>
+    <div style="display:grid;gap:10px;font-size:13px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">1</span>
+        <div><b style="color:var(--text)">Gere o lote</b> aqui no agente → copie o prompt de cada imagem individualmente</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">2</span>
+        <div><b style="color:var(--text)">Cole no Microsoft Designer</b> (<a href="https://designer.microsoft.com" target="_blank">designer.microsoft.com</a>) — melhor limite gratuito (~15/dia) · Gere e baixe o PNG</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">3</span>
+        <div><b style="color:var(--text)">Faça upscale 4×</b> no <a href="https://upscayl.org" target="_blank">Upscayl</a> — app gratuito, open source, sem limite de imagens, sem conta, roda offline no seu computador · <a href="https://github.com/upscayl/upscayl/releases" target="_blank" style="color:var(--accent-2);">Baixar Upscayl →</a></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">4</span>
+        <div><b style="color:var(--text)">Faça upload no Adobe Stock</b> — cole título, descrição e palavras-chave gerados aqui · Idioma: English · Marque "AI generated"</div>
+      </div>
+      <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-top:2px;">
+        Esgotou o limite diário do Designer? Complete com <b style="color:var(--text)">Ideogram</b> (10/dia) ou <b style="color:var(--text)">Firefly</b> (5/dia). Com as 3 ferramentas juntas: até ~30 imagens/dia.
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;border-color:var(--accent);">
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — API Hugging Face (gratuita)</div>
+    <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;">Cole sua chave gratuita do Hugging Face e o agente gera todas as imagens do lote automaticamente, exibindo cada uma com botão de download. Sem abrir outra aba, sem copiar prompt por prompt.</p>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent-2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+      <b style="color:var(--text);">Como obter a chave gratuita (1 minuto):</b><br>
+      1. Acesse <a href="https://huggingface.co/join" target="_blank" style="color:var(--accent);">huggingface.co/join</a> e crie uma conta gratuita<br>
+      2. Vá em <a href="https://huggingface.co/settings/tokens" target="_blank" style="color:var(--accent);">huggingface.co/settings/tokens</a> → clique em <b style="color:var(--text);">"New token"</b><br>
+      3. Escolha tipo <b style="color:var(--text);">Read</b>, dê um nome qualquer, clique em <b style="color:var(--text);">"Create token"</b><br>
+      4. Copie o token (começa com <b style="color:var(--text);">hf_...</b>) e cole abaixo<br>
+      <span style="color:var(--text-muted);font-size:11.5px;margin-top:4px;display:block;">Modelo usado: <b style="color:var(--text);">SDXL (Stable Diffusion XL)</b> — gera em 1024px. Após Upscayl 4× → 4096px (16MP) → passa no Adobe Stock com folga.</span>
+    </div>
+    <div class="grid cols-2">
+      <div class="field" style="margin-bottom:0;">
+        <label for="hfKey">Token Hugging Face</label>
+        <input type="password" id="hfKey" placeholder="hf_..." oninput="salvarChaveHF(this.value)">
+      </div>
+      <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn secondary small" onclick="toggleHFKey()" style="height:42px;">Mostrar/Ocultar</button>
+      </div>
+    </div>
+    <div class="helper" id="hfKeyHelper" style="margin-top:8px;"></div>
+  </div>
+</section>
+
+<section id="resultados">
+  <h2><span class="num">02</span> Resultados</h2>
+  <p class="desc">Clique em <b>"Gerar todas as imagens"</b> para criar o lote automaticamente via Hugging Face. Cada imagem aparece aqui com botão de download — depois é só rodar no Upscayl e fazer o upload.</p>
+  <div id="resultsArea">
+    <div class="card" style="text-align:center;color:var(--text-muted);padding:32px;">
+      Nenhum lote gerado ainda. Use a seção 01 acima.
+    </div>
+  </div>
+  <div id="batchActionsWrap" style="display:none;margin-top:16px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+      <button class="btn" id="btnGerarImagens" onclick="gerarTodasImagens()">⚡ Gerar todas as imagens</button>
+      <button class="btn secondary" onclick="registrarLoteNoPainel()">Registrar no painel →</button>
+    </div>
+    <div class="progress-bar-wrap" id="progressWrap" style="display:none;margin-top:12px;">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="batchStatus" style="font-size:12px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);"></div>
+  </div>
+</section>
+
+<section id="checklist">
+  <h2><span class="num">03</span> Checklist de envio</h2>
+  <p class="desc">Antes de enviar cada imagem para Adobe Stock ou Shutterstock, confira estes pontos. Marcar errado (ou esquecer) pode causar rejeição — ou, em casos de uso indevido repetido, suspensão da conta.</p>
+  <div class="card">
+    <ul class="checklist">
+      <li>
+        <input type="checkbox" id="c1">
+        <span class="lbl"><b>Marcar "Created using generative AI tools"</b> — obrigatório em toda imagem feita com IA, sem exceção.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="cLang">
+        <span class="lbl"><b style="color:var(--accent)">⚠️ Campo "Idioma das palavras-chave" → selecionar English.</b> Sua conta está em Português (BR) na interface, mas os metadados das imagens precisam estar em inglês. Esse campo fica na tela de edição de cada arquivo — não confundir com o idioma da conta Adobe.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c2">
+        <span class="lbl"><b>Se a imagem tiver uma "pessoa" gerada por IA</b> que pareça real, marcar também "People and Property are fictional". Se não houver figuras humanas reconhecíveis, pode deixar desmarcado.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c3">
+        <span class="lbl"><b>Verificar resolução mínima de 4 megapixels (2000×2000px ou maior).</b> Se gerou pelo Firefly → já está OK, pode pular. Se gerou pela API Gemini → precisa de upscale antes do upload.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="cUpscale">
+        <span class="lbl"><b style="color:var(--accent);">🔍 Upscale obrigatório antes do upload:</b> abra o <a href="https://upscayl.org" target="_blank"><b>Upscayl</b></a> (<a href="https://github.com/upscayl/upscayl/releases" target="_blank" style="color:var(--accent-2)">baixar aqui</a> — gratuito, sem limite, roda offline) → selecione a imagem → escolha <b>4× de ampliação</b> → exporte. Aplicável a todas as ferramentas gratuitas de geração.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c4">
+        <span class="lbl"><b>Não usar nomes de marcas, pessoas reais, celebridades ou personagens fictícios</b> no prompt, título ou palavras-chave — nem mesmo indiretamente.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c5">
+        <span class="lbl"><b>Varie as proporções do lote</b> (quadrado, retrato, paisagem, vertical) — o agente já sugere isso, mas confirme antes de enviar.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c6">
+        <span class="lbl"><b>Evite enviar imagens muito parecidas em sequência.</b> Cada imagem deve ter potencial de licenciamento próprio — isso reduz o risco de o envio ser sinalizado como spam.</span>
+      </li>
+      <li>
+        <input type="checkbox" id="c7">
+        <span class="lbl"><b>Revise as palavras-chave geradas</b> antes de colar — remova qualquer termo que não represente fielmente a imagem final.</span>
+      </li>
+    </ul>
+  </div>
+  <div class="note" style="margin-top:14px;">
+    <b>Sobre a conta:</b> use sua conta antiga do Adobe Stock (a que já teve 1 venda) — manter o histórico é melhor do que começar do zero. O idioma da interface da conta (Português BR) é diferente do idioma das palavras-chave de cada arquivo — são campos separados. Os metadados gerados por este agente estão sempre em inglês. <b>Upscale:</b> instale o Upscayl uma vez e use ilimitadamente — é a solução definitiva para o problema de resolução.
+  </div>
+</section>
+
+<section id="painel">
+  <h2><span class="num">04</span> Painel de controle</h2>
+  <p class="desc">Registre seus lotes para acompanhar o que já foi criado, enviado, aprovado ou vendido. Os dados ficam salvos neste navegador (não são enviados a lugar nenhum).</p>
+
+  <div class="card">
+    <div class="grid cols-3">
+      <div class="field">
+        <label for="trkDate">Data</label>
+        <input type="date" id="trkDate">
+      </div>
+      <div class="field">
+        <label for="trkNiche">Nicho / descrição do lote</label>
+        <input type="text" id="trkNiche" placeholder="ex: Pets & emoções - lote 1">
+      </div>
+      <div class="field">
+        <label for="trkQty">Qtd. imagens</label>
+        <input type="number" id="trkQty" min="1" value="8">
+      </div>
+    </div>
+    <div class="grid cols-3">
+      <div class="field">
+        <label for="trkPlatform">Plataforma</label>
+        <select id="trkPlatform">
+          <option>Adobe Stock</option>
+          <option>Shutterstock</option>
+          <option>Outra</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="trkStatus">Status</label>
+        <select id="trkStatus">
+          <option>Gerado</option>
+          <option>Imagens criadas</option>
+          <option>Enviado</option>
+          <option>Aprovado</option>
+          <option>Rejeitado</option>
+          <option>Vendido</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="trkNotes">Observações</label>
+        <input type="text" id="trkNotes" placeholder="opcional">
+      </div>
+    </div>
+    <button class="btn" onclick="addTrackerEntry()">Adicionar registro</button>
+  </div>
+
+  <hr class="thin">
+
+  <div class="stats" id="trkStats"></div>
+  <table id="trkTable">
+    <thead>
+      <tr><th>Data</th><th>Lote</th><th>Qtd</th><th>Plataforma</th><th>Status</th><th>Obs.</th><th></th></tr>
+    </thead>
+    <tbody id="trkBody"></tbody>
+  </table>
+</section>
+
+</main>
+
+<script>
+/* ---------- Dados ---------- */
+// Cada entrada: [rótulo exibido, largura, altura, descrição]
+const ASPECTS = [
+  ["1:1",  2000, 2000, "quadrado"],
+  ["3:2",  3000, 2000, "paisagem"],
+  ["4:5",  2000, 2500, "retrato"],
+  ["9:16", 1500, 2667, "vertical"],
+];
+
+const NICHES = {
+  emocional:{
+    label:"Conceitos emocionais & bem-estar",
+    concept:"Mental Wellness Concept",
+    subjects:[
+      "a person sitting alone by a window watching gentle rain",
+      "a tangled ball of glowing yarn slowly being untangled by a hand",
+      "a small green plant growing through a crack in grey concrete",
+      "a person carrying a heavy backpack shaped like storm clouds",
+      "two hands reaching toward each other across a gap of light",
+      "a lighthouse glowing softly on a calm dark shore"
+    ],
+    styles:[
+      "soft watercolor illustration with visible paper texture",
+      "minimalist flat vector illustration with bold simple shapes",
+      "gentle gouache painting style with muted tones",
+      "modern digital illustration with subtle grainy texture",
+      "line art illustration with a single color accent",
+      "dreamy soft-focus digital painting"
+    ],
+    lighting:[
+      "warm late afternoon light",
+      "soft overcast diffused light",
+      "gentle morning glow",
+      "cool blue twilight tones",
+      "warm golden backlight",
+      "soft ambient lamp light"
+    ],
+    compositions:[
+      "centered subject with generous negative space for text overlay",
+      "off-center composition with copy space on the right",
+      "wide framing leaving empty space at the top for a headline",
+      "close-up framing with a shallow depth of field",
+      "symmetrical balanced composition",
+      "minimal composition with a large empty background area"
+    ],
+    palettes:[
+      "muted earth tones with soft beige and terracotta",
+      "calm pastel blue and lavender tones",
+      "warm cream and soft gold tones",
+      "deep teal with warm amber accents",
+      "soft sage green and cream tones",
+      "dusty rose and warm grey tones"
+    ],
+    keywords:["mental health","wellness","emotion","calm","anxiety","hope","growth","mindfulness","loneliness","healing","peace","self care","therapy concept","emotional support","resilience","balance","recovery","comfort","reflection","inner peace","mind","soul","gentle","conceptual","metaphor","wellbeing","support","journey","light","illustration"]
+  },
+  pets:{
+    label:"Pets & emoções",
+    concept:"Pet Lifestyle Concept",
+    subjects:[
+      "a golden retriever puppy looking up with curious eyes",
+      "a senior dog resting peacefully in a warm sunbeam",
+      "a cat watching raindrops slide down a window",
+      "a small dog wrapped snugly in a cozy blanket",
+      "two dogs playing joyfully among autumn leaves",
+      "a dog with a thoughtful gentle expression in close-up portrait"
+    ],
+    styles:[
+      "photorealistic portrait photography style with shallow depth of field",
+      "warm cinematic photography style with soft bokeh",
+      "natural light lifestyle photography style",
+      "soft pastel illustration style with simple shapes",
+      "cozy storybook illustration style",
+      "high detail studio portrait lighting style"
+    ],
+    lighting:[
+      "soft window light",
+      "golden hour sunlight",
+      "cozy indoor lamp glow",
+      "bright natural daylight",
+      "moody soft shadows",
+      "warm backlit glow"
+    ],
+    compositions:[
+      "close-up portrait with a softly blurred background",
+      "wide shot with empty space for text on one side",
+      "centered portrait against a simple background",
+      "candid lifestyle framing",
+      "low angle eye-level shot",
+      "top-down flat lay composition"
+    ],
+    palettes:[
+      "warm neutral tones with a soft cream background",
+      "cozy autumn oranges and browns",
+      "soft pastel pink and cream tones",
+      "natural greens and earth tones",
+      "warm golden and chocolate brown tones",
+      "soft grey and white minimal tones"
+    ],
+    keywords:["pet","dog","puppy","cat","kitten","animal","emotion","companion","cute","cozy","lifestyle","portrait","love","friendship","loyalty","playful","calm","relaxed","adorable","fluffy","domestic animal","pet care","affection","bond","family pet","indoor","sunlight","warm","gentle","happy"]
+  },
+  tech:{
+    label:"Tecnologia & IA conceitual",
+    concept:"Technology Concept",
+    subjects:[
+      "a glowing neural network shaped like a tree of light",
+      "a human hand reaching toward a holographic interface",
+      "an abstract network of connected glowing nodes",
+      "a futuristic workspace with floating data screens",
+      "a digital brain made of light particles dissolving into data",
+      "a city skyline made of glowing circuit board patterns"
+    ],
+    styles:[
+      "clean 3D render with soft gradients",
+      "futuristic digital illustration with neon accents",
+      "minimalist isometric 3D illustration",
+      "abstract glass and light digital art",
+      "low-poly 3D illustration style",
+      "photorealistic 3D render with studio lighting"
+    ],
+    lighting:[
+      "cool blue ambient glow",
+      "neon accent lighting",
+      "soft studio gradient lighting",
+      "dramatic rim lighting",
+      "futuristic holographic glow",
+      "soft diffused tech lab lighting"
+    ],
+    compositions:[
+      "centered subject floating against an empty dark background for text",
+      "wide framing with copy space on the left",
+      "close-up macro detail shot",
+      "symmetrical composition with a subtle grid background",
+      "diagonal dynamic composition",
+      "top-down view of a workspace"
+    ],
+    palettes:[
+      "deep navy with electric blue accents",
+      "dark charcoal with neon purple and cyan",
+      "clean white and soft blue gradient",
+      "monochrome silver with a blue glow",
+      "dark background with warm amber data lines",
+      "gradient from teal to violet"
+    ],
+    keywords:["artificial intelligence","technology","innovation","digital","future","network","data","machine learning","automation","connectivity","abstract","concept","neural network","digital transformation","cloud computing","robotics","software","futuristic","business technology","glow","abstract background","science","computing","virtual","smart technology","algorithm","interface","copy space","render"]
+  },
+  lifestyle:{
+    label:"Estilo de vida & rotinas autênticas",
+    concept:"Lifestyle Concept",
+    subjects:[
+      "a person journaling with a cup of coffee at a sunlit table",
+      "hands kneading dough on a flour dusted kitchen counter",
+      "a person stretching near a window in the early morning",
+      "a simple desk setup with a notebook, plant and warm light",
+      "a close-up of hands holding a warm mug near a window",
+      "a person reading a book on a cozy sofa by a lamp"
+    ],
+    styles:[
+      "natural light lifestyle photography style",
+      "warm film photography aesthetic with soft grain",
+      "candid documentary photography style",
+      "minimalist editorial photography style",
+      "soft muted tone lifestyle photography",
+      "cozy interior photography style"
+    ],
+    lighting:[
+      "soft natural window light",
+      "warm morning sunlight",
+      "soft diffused daylight",
+      "golden hour glow through curtains",
+      "cozy lamp light in the evening",
+      "overcast soft natural light"
+    ],
+    compositions:[
+      "candid off-center framing with negative space",
+      "overhead flat lay composition",
+      "wide shot with empty space for text on the right",
+      "close-up detail shot with a shallow depth of field",
+      "symmetrical minimal composition",
+      "side angle candid framing"
+    ],
+    palettes:[
+      "warm neutral tones with cream and beige",
+      "soft muted earth tones",
+      "natural wood tones with white accents",
+      "soft grey and warm white tones",
+      "muted sage green and cream tones",
+      "warm terracotta and cream tones"
+    ],
+    keywords:["lifestyle","daily routine","morning","cozy","home","authentic","candid","simple living","mindfulness","slow living","wellness","productivity","workspace","journaling","coffee","natural light","minimalism","self care","calm","everyday life","texture","copy space","editorial","real life","comfort","relaxation","home decor","warm tones","slow morning","routine"]
+  },
+  textures:{
+    label:"Texturas & backgrounds sensoriais",
+    concept:"Abstract Background",
+    subjects:[
+      "a close-up of crumpled handmade paper texture",
+      "a macro shot of water droplets resting on a leaf",
+      "an abstract close-up of flowing fabric folds",
+      "a macro texture of tree bark with natural patterns",
+      "a close-up of sand ripples with soft shadows",
+      "a macro shot of dried flowers and natural textures"
+    ],
+    styles:[
+      "macro photography style with shallow depth of field",
+      "abstract fine art photography style",
+      "soft natural texture photography",
+      "high detail macro render",
+      "minimalist textural photography",
+      "organic abstract close-up photography"
+    ],
+    lighting:[
+      "soft natural side light",
+      "warm directional light casting soft shadows",
+      "diffused studio lighting",
+      "golden hour raking light",
+      "cool soft daylight",
+      "moody low-key lighting with soft highlights"
+    ],
+    compositions:[
+      "full-frame texture fill with no focal point",
+      "close-up macro framing with shallow focus",
+      "abstract pattern composition",
+      "diagonal composition emphasizing texture flow",
+      "centered detail shot",
+      "wide texture background with a subtle gradient"
+    ],
+    palettes:[
+      "warm neutral beige and cream tones",
+      "soft earthy browns and greens",
+      "cool grey and blue tones",
+      "muted pastel tones",
+      "rich warm terracotta tones",
+      "soft monochrome tones"
+    ],
+    keywords:["texture","background","abstract","macro","pattern","natural","organic","surface","material","close-up","design element","backdrop","neutral","minimalist","copy space","wallpaper","fine art","detail","soft focus","tactile","sensory","nature","fabric","paper","wood","stone","design resource","web background","print background","decorative"]
+  }
+};
+
+const GENERIC = {
+  label:"Personalizado",
+  concept:"Concept Illustration",
+  styles:["clean digital illustration style","photorealistic photography style","soft watercolor illustration style","minimalist flat vector style","cinematic photography style","modern 3D render style"],
+  lighting:["soft natural light","warm golden hour light","cool diffused light","dramatic studio lighting","gentle ambient light","bright daylight"],
+  compositions:["centered composition with negative space for text","off-center composition with copy space","wide framing with empty space for a headline","close-up framing with shallow depth of field","symmetrical balanced composition","minimal composition with empty background"],
+  palettes:["warm neutral tones","cool muted blue tones","soft pastel tones","earthy natural tones","monochrome tones with one accent color","warm golden tones"],
+  keywords:["concept","illustration","design","background","copy space","modern","creative","abstract","clean","minimal"]
+};
+
+const STOPWORDS = new Set(["a","an","the","of","in","on","at","with","and","to","near","by","through","into","over","for","from","toward","one","two","its","it","that","this","being","is","are","made"]);
+
+/* ---------- Helpers ---------- */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function capFirst(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function extractWords(text){
+  return text.toLowerCase().replace(/[^a-z\s]/g," ").split(/\s+/).filter(w=>w.length>2 && !STOPWORDS.has(w));
+}
+
+function buildPromptText(item, tool){
+  const cap = capFirst(item.subject);
+  const [ratio, w, h, desc] = item.aspect;
+  const dimNote = `${ratio} (${w}x${h}px)`;
+  if(tool==="aistudio"){
+    // Google AI Studio / Gemini Image — prefere prompts descritivos e diretos, sem colchetes
+    return `${cap}. Style: ${item.style}. Lighting: ${item.lighting}. Color palette: ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. High detail, professional quality, no text, no watermark, no logo.`;
+  } else if(tool==="designer"){
+    // Microsoft Designer (DALL-E 3) — responde bem a frases naturais e detalhadas
+    return `${cap}, depicted in ${item.style}, with ${item.lighting}. Use a color palette of ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. Highly detailed, clean professional image, no text or watermarks.`;
+  } else if(tool==="firefly"){
+    // Adobe Firefly — suporta palavras-chave separadas por vírgula + modificadores
+    return `${cap}, ${item.style}, ${item.lighting}, ${item.palette}, ${item.composition}, aspect ratio ${ratio}, ultra detail, photorealistic, no text, no watermark, commercially safe`;
+  } else if(tool==="ideogram"){
+    // Ideogram 3.0 — forte em estilos artísticos, aceita prompts detalhados
+    return `${cap}. Rendered as ${item.style}. ${capFirst(item.lighting)}. ${capFirst(item.palette)}. ${capFirst(item.composition)}. Image ratio ${ratio}. Ultra high quality, professional stock photo, no text, no watermark.`;
+  } else {
+    // Genérico
+    return `${cap}, ${item.style}, ${item.lighting}, ${item.palette}, ${item.composition}, aspect ratio ${ratio}, high detail, no text, no watermark.`;
+  }
+}
+function buildTitle(item, niche){
+  // Title Case completo do assunto (preserva preposições curtas em minúsculo no meio)
+  const LOWER_MID = new Set(["a","an","the","of","in","on","at","with","and","to","by","for","from","near","into","over","through"]);
+  const subjectWords = item.subject.replace(/^(a|an|the)\s+/i,"").split(/\s+/);
+  const titleCased = subjectWords.map((w,i)=>{
+    const lw = w.toLowerCase();
+    if(i>0 && LOWER_MID.has(lw)) return lw;
+    return lw.charAt(0).toUpperCase()+lw.slice(1);
+  }).join(" ");
+  // Estilo e aspecto como sufixo enriquecedor
+  const styleTag = item.style.split(" ").slice(0,3).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+  return `${titleCased} - ${styleTag}, ${niche.concept}`;
+}
+function buildDescription(item){
+  return `${capFirst(item.subject)}, rendered as ${item.style.toLowerCase()} with ${item.lighting.toLowerCase()}. ${capFirst(item.composition)}, using a palette of ${item.palette.toLowerCase()}.`;
+}
+function buildKeywords(item, niche){
+  const kws=[];
+  const add=(w)=>{ if(w && !kws.includes(w)) kws.push(w); };
+  extractWords(item.subject).forEach(add);
+  (niche.keywords||[]).forEach(add);
+  extractWords(item.style).forEach(add);
+  extractWords(item.lighting).forEach(add);
+  extractWords(item.palette).forEach(add);
+  add("generative ai");
+  add("ai generated");
+  return kws.slice(0,49);
+}
+
+function generateBatch(nicheKey, tool, count, customSubjects){
+  let niche, subjects;
+  if(nicheKey==="custom"){
+    niche = GENERIC;
+    subjects = customSubjects;
+  } else {
+    niche = NICHES[nicheKey];
+    subjects = shuffle(niche.subjects);
+  }
+  const items=[];
+  for(let i=0;i<count;i++){
+    const subject = subjects[i % subjects.length];
+    const item = {
+      id:i+1,
+      nicheKey,
+      nicheLabel: niche.label,
+      subject,
+      style:pick(niche.styles),
+      lighting:pick(niche.lighting),
+      composition:pick(niche.compositions),
+      palette:pick(niche.palettes),
+      aspect: pick(ASPECTS)  // [ratio, w, h, desc]
+    };
+    item.prompt = buildPromptText(item, tool);
+    item.title = buildTitle(item, niche);
+    item.description = buildDescription(item);
+    item.keywords = buildKeywords(item, niche);
+    items.push(item);
+  }
+  return items;
+}
+
+/* ---------- UI: geração ---------- */
+function onNicheChange(){
+  const niche = document.getElementById("nicheSelect").value;
+  const isCustom = niche==="custom";
+  document.getElementById("customField").style.display = isCustom ? "block" : "none";
+  document.getElementById("qtyField").style.display = isCustom ? "none" : "block";
+}
+
+let currentBatch = [];
+
+function gerarLote(){
+  const nicheKey = document.getElementById("nicheSelect").value;
+  const tool = document.getElementById("toolSelect").value;
+  const toolLabel = {
+    aistudio:"Google AI Studio",
+    designer:"Microsoft Designer",
+    firefly:"Adobe Firefly",
+    ideogram:"Ideogram 3.0",
+    generic:"Genérico"
+  }[tool] || tool;
+  let count, customSubjects = null;
+
+  if(nicheKey==="custom"){
+    const raw = document.getElementById("customSubjects").value.trim();
+    if(!raw){
+      document.getElementById("genHelper").textContent = "Escreva ao menos um tema, um por linha.";
+      return;
+    }
+    customSubjects = raw.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,12);
+    count = customSubjects.length;
+  } else {
+    count = parseInt(document.getElementById("qtyInput").value,10) || 8;
+    count = Math.max(1, Math.min(12, count));
+  }
+
+  currentBatch = generateBatch(nicheKey, tool, count, customSubjects);
+  currentBatch._toolLabel = toolLabel;
+  currentBatch._nicheLabel = nicheKey==="custom" ? "Personalizado" : NICHES[nicheKey].label;
+
+  renderResults(currentBatch, toolLabel);
+  document.getElementById("genHelper").textContent = `Lote gerado: ${count} imagens · ferramenta: ${toolLabel}.`;
+  const baw = document.getElementById("batchActionsWrap");
+  baw.style.display = "block";
+  document.getElementById("resultados").scrollIntoView({behavior:"smooth"});
+}
+
+function copyText(btn, text){
+  const fallback = ()=>{
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    ta.style.position="fixed";
+    ta.style.opacity="0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).catch(fallback);
+  } else {
+    fallback();
+  }
+  const original = btn.textContent;
+  btn.textContent = "Copiado!";
+  setTimeout(()=>{ btn.textContent = original; }, 1300);
+}
+
+function createField(labelText, text){
+  const wrap=document.createElement("div");
+  wrap.className="field";
+  const lbl=document.createElement("label");
+  lbl.textContent=labelText;
+  const box=document.createElement("div");
+  box.className="codebox";
+  const span=document.createElement("div");
+  span.className="txt";
+  span.textContent=text;
+  const btn=document.createElement("button");
+  btn.className="copy-btn";
+  btn.textContent="Copiar";
+  btn.onclick=()=>copyText(btn,text);
+  box.appendChild(span);
+  box.appendChild(btn);
+  wrap.appendChild(lbl);
+  wrap.appendChild(box);
+  return wrap;
+}
+
+function renderResults(items, toolLabel){
+  const area=document.getElementById("resultsArea");
+  area.innerHTML="";
+  items.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="frame-card";
+
+    const strip=document.createElement("div");
+    strip.className="frame-strip";
+    const num=document.createElement("span");
+    num.textContent = "0"+item.id;
+    if(item.id>9) num.textContent = String(item.id);
+    strip.appendChild(num);
+
+    const body=document.createElement("div");
+    body.className="frame-body";
+
+    const meta=document.createElement("div");
+    meta.className="frame-meta";
+    const [ratio, w, h, desc] = item.aspect;
+    meta.innerHTML = `<b>${item.nicheLabel}</b> · <b style="color:var(--accent)">${ratio}</b> <span style="color:var(--text-muted)">(${w}×${h}px · ${desc})</span>`;
+    body.appendChild(meta);
+
+    // Aviso de idioma — não pode esquecer
+    const langAlert = document.createElement("div");
+    langAlert.style.cssText="background:#1e2a1e;border:1px solid #3a5c3a;border-left:3px solid var(--success);border-radius:7px;padding:8px 12px;font-size:12px;color:#9abf9a;margin-bottom:14px;";
+    langAlert.innerHTML='⚠️ <b style="color:#b8dbb8">Ao fazer upload:</b> no campo <b style="color:#b8dbb8">Idioma das palavras-chave</b>, selecione <b style="color:#b8dbb8">English</b> — independente do idioma da sua conta Adobe.';
+    body.appendChild(langAlert);
+
+    body.appendChild(createField(`Prompt (${toolLabel})`, item.prompt));
+    body.appendChild(createField("Título (Adobe Stock / Shutterstock)", item.title));
+    body.appendChild(createField("Descrição", item.description));
+    body.appendChild(createField(`Palavras-chave (${item.keywords.length}) — ordem: relevância ↓ genérico`, item.keywords.join(", ")));
+
+    // Aviso pessoas IA se o nicho for lifestyle ou pets
+    if(["lifestyle"].includes(item.nicheKey)){
+      const peopleAlert = document.createElement("div");
+      peopleAlert.style.cssText="background:#2a1e1e;border:1px solid #5c3a3a;border-left:3px solid var(--danger);border-radius:7px;padding:8px 12px;font-size:12px;color:#bf9a9a;margin-top:10px;";
+      peopleAlert.innerHTML='👤 <b style="color:#dbb8b8">Atenção:</b> se a imagem gerada mostrar uma pessoa com aparência realista, marque <b style="color:#dbb8b8">"People and Property are fictional"</b> no upload.';
+      body.appendChild(peopleAlert);
+    }
+
+    // Slot de imagem gerada automaticamente
+    const imgSlotWrap = document.createElement("div");
+    imgSlotWrap.className = "img-slot";
+    const imgStatus = document.createElement("div");
+    imgStatus.className = "img-status";
+    imgStatus.id = `imgStatus_${item.id}`;
+    imgStatus.textContent = "⏳ Aguardando geração — clique em 'Gerar todas as imagens' acima";
+    const imgSlot = document.createElement("div");
+    imgSlot.id = `imgSlot_${item.id}`;
+    imgSlotWrap.appendChild(imgStatus);
+    imgSlotWrap.appendChild(imgSlot);
+    body.appendChild(imgSlotWrap);
+
+    card.appendChild(strip);
+    card.appendChild(body);
+    area.appendChild(card);
+  });
+}
+
+/* ---------- API Key — Hugging Face ---------- */
+function salvarChaveHF(val){
+  localStorage.setItem("hfApiKey", val.trim());
+  const h = document.getElementById("hfKeyHelper");
+  if(h){ h.textContent = val.trim() ? "✓ Token salvo neste navegador." : ""; h.style.color="var(--success)"; }
+}
+function toggleHFKey(){
+  const inp = document.getElementById("hfKey");
+  if(inp) inp.type = inp.type==="password" ? "text" : "password";
+}
+
+/* ---------- Geração automática via Hugging Face (SDXL) ---------- */
+async function callHFImage(token, prompt, width, height){
+  // SDXL suporta múltiplas resoluções — mapeamos para as mais próximas suportadas
+  const supportedSizes = [
+    [1024,1024],[1152,896],[896,1152],[1216,832],[832,1216],[1344,768],[768,1344],[1536,640],[640,1536]
+  ];
+  // Escolhe o tamanho suportado com proporção mais próxima
+  const targetRatio = width/height;
+  let best = supportedSizes[0];
+  let bestDiff = Math.abs(best[0]/best[1] - targetRatio);
+  for(const [w,h] of supportedSizes){
+    const diff = Math.abs(w/h - targetRatio);
+    if(diff < bestDiff){ bestDiff=diff; best=[w,h]; }
+  }
+  const [sw,sh] = best;
+
+  const resp = await fetch(
+    "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+    {
+      method:"POST",
+      headers:{"Authorization":`Bearer ${token}`,"Content-Type":"application/json"},
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters:{ width:sw, height:sh, num_inference_steps:30, guidance_scale:7.5 }
+      })
+    }
+  );
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=>"");
+    let msg = `Erro HTTP ${resp.status}`;
+    try{ const j=JSON.parse(txt); msg=j.error||msg; }catch(e){}
+    // Modelo carregando (503)
+    if(resp.status===503) throw new Error("Modelo inicializando (aguarde ~20s e tente novamente)");
+    throw new Error(msg);
+  }
+  const blob = await resp.blob();
+  if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada da API — tente novamente");
+  return URL.createObjectURL(blob);
+}
+
+async function gerarTodasImagens(){
+  const token = (localStorage.getItem("hfApiKey")||"").trim();
+  if(!token){
+    alert("Cole seu token do Hugging Face na seção 01 antes de gerar.");
+    document.getElementById("hfKey")?.focus();
+    return;
+  }
+  if(currentBatch.length===0){ alert("Gere um lote primeiro (seção 01)."); return; }
+
+  const btn = document.getElementById("btnGerarImagens");
+  const progressWrap = document.getElementById("progressWrap");
+  const progressBar  = document.getElementById("progressBar");
+  const batchStatus  = document.getElementById("batchStatus");
+
+  btn.disabled=true; btn.textContent="Gerando...";
+  progressWrap.style.display="block"; progressBar.style.width="0%";
+  batchStatus.textContent="Iniciando geração...";
+
+  let ok=0, fail=0;
+
+  for(let i=0;i<currentBatch.length;i++){
+    const item = currentBatch[i];
+    const statusEl = document.getElementById(`imgStatus_${item.id}`);
+    const slotEl   = document.getElementById(`imgSlot_${item.id}`);
+    if(!statusEl||!slotEl) continue;
+
+    const [ratio,w,h] = item.aspect;
+    statusEl.className="img-status spin";
+    statusEl.textContent=`Gerando ${item.id}/${currentBatch.length}...`;
+    batchStatus.textContent=`Imagem ${i+1} de ${currentBatch.length} — aguarde...`;
+
+    try{
+      const objUrl = await callHFImage(token, item.prompt, w, h);
+      slotEl.innerHTML="";
+      const img=document.createElement("img");
+      img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);";
+      slotEl.appendChild(img);
+      const a=document.createElement("a");
+      a.href=objUrl; a.download=`img_lote_${item.id}.png`;
+      a.className="dl-link"; a.textContent=`⬇ Baixar imagem ${item.id}`;
+      slotEl.appendChild(a);
+      const note=document.createElement("div");
+      note.style.cssText="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);";
+      note.textContent="✓ Gerada — faça upscale 4× no Upscayl antes do upload no Adobe Stock";
+      slotEl.appendChild(note);
+      statusEl.className="img-status ok";
+      statusEl.textContent=`✓ Imagem ${item.id} pronta`;
+      ok++;
+    } catch(e){
+      statusEl.className="img-status err";
+      statusEl.textContent=`✗ Imagem ${item.id}: ${e.message}`;
+      slotEl.innerHTML=`<button class="btn small secondary" onclick="regenarImagem(${item.id})">↺ Tentar novamente</button>`;
+      fail++;
+    }
+
+    progressBar.style.width=`${Math.round(((i+1)/currentBatch.length)*100)}%`;
+    if(i<currentBatch.length-1) await new Promise(r=>setTimeout(r,1000));
+  }
+
+  btn.disabled=false; btn.textContent="⚡ Gerar novamente";
+  batchStatus.textContent=`Concluído: ${ok} geradas${fail>0?`, ${fail} com erro — clique em "Tentar novamente" em cada uma`:""}. Faça upscale 4× no Upscayl antes do upload.`;
+}
+
+async function regenarImagem(id){
+  const token = (localStorage.getItem("hfApiKey")||"").trim();
+  if(!token){ alert("Token HF não encontrado."); return; }
+  const item = currentBatch.find(x=>x.id===id);
+  if(!item) return;
+  const statusEl=document.getElementById(`imgStatus_${id}`);
+  const slotEl=document.getElementById(`imgSlot_${id}`);
+  statusEl.className="img-status spin"; statusEl.textContent=`Tentando novamente imagem ${id}...`;
+  slotEl.innerHTML="";
+  const [ratio,w,h]=item.aspect;
+  try{
+    const objUrl=await callHFImage(token,item.prompt,w,h);
+    slotEl.innerHTML="";
+    const img=document.createElement("img");
+    img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);";
+    slotEl.appendChild(img);
+    const a=document.createElement("a");
+    a.href=objUrl; a.download=`img_lote_${id}.png`; a.className="dl-link"; a.textContent=`⬇ Baixar imagem ${id}`;
+    slotEl.appendChild(a);
+    statusEl.className="img-status ok"; statusEl.textContent=`✓ Imagem ${id} pronta`;
+  } catch(e){
+    statusEl.className="img-status err"; statusEl.textContent=`✗ ${e.message}`;
+    slotEl.innerHTML=`<button class="btn small secondary" onclick="regenarImagem(${id})">↺ Tentar novamente</button>`;
+  }
+}
+
+/* ---------- Painel de controle ---------- */
+const TRACKER_KEY = "stockAgentTrackerEntries";
+
+function loadTracker(){
+  try{
+    return JSON.parse(localStorage.getItem(TRACKER_KEY)) || [];
+  }catch(e){ return []; }
+}
+function saveTracker(entries){
+  localStorage.setItem(TRACKER_KEY, JSON.stringify(entries));
+}
+function renderTracker(){
+  const entries = loadTracker();
+  const body = document.getElementById("trkBody");
+  body.innerHTML="";
+  if(entries.length===0){
+    const tr=document.createElement("tr");
+    tr.className="empty-row";
+    tr.innerHTML = `<td colspan="7">Nenhum registro ainda. Adicione um lote acima.</td>`;
+    body.appendChild(tr);
+  } else {
+    entries.forEach((e,idx)=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+        <td>${e.date}</td>
+        <td>${e.niche}</td>
+        <td>${e.qty}</td>
+        <td>${e.platform}</td>
+        <td><span class="badge">${e.status}</span></td>
+        <td>${e.notes||""}</td>
+        <td class="actions"><button class="btn small secondary" data-idx="${idx}">Remover</button></td>
+      `;
+      tr.querySelector("button").onclick=()=>{
+        const all = loadTracker();
+        all.splice(idx,1);
+        saveTracker(all);
+        renderTracker();
+      };
+      body.appendChild(tr);
+    });
+  }
+
+  // Stats
+  const counts={};
+  entries.forEach(e=>{ counts[e.status]=(counts[e.status]||0)+1; });
+  const statsEl=document.getElementById("trkStats");
+  statsEl.innerHTML="";
+  const totalBadge=document.createElement("span");
+  totalBadge.className="badge";
+  totalBadge.textContent=`Total de lotes: ${entries.length}`;
+  statsEl.appendChild(totalBadge);
+  Object.keys(counts).forEach(status=>{
+    const b=document.createElement("span");
+    b.className="badge";
+    b.textContent=`${status}: ${counts[status]}`;
+    statsEl.appendChild(b);
+  });
+}
+
+function addTrackerEntry(){
+  const date = document.getElementById("trkDate").value || new Date().toISOString().slice(0,10);
+  const niche = document.getElementById("trkNiche").value.trim() || "(sem descrição)";
+  const qty = document.getElementById("trkQty").value || "-";
+  const platform = document.getElementById("trkPlatform").value;
+  const status = document.getElementById("trkStatus").value;
+  const notes = document.getElementById("trkNotes").value.trim();
+
+  const entries = loadTracker();
+  entries.unshift({date, niche, qty, platform, status, notes});
+  saveTracker(entries);
+  renderTracker();
+
+  document.getElementById("trkNotes").value="";
+}
+
+function registrarLoteNoPainel(){
+  if(currentBatch.length===0) return;
+  document.getElementById("trkDate").value = new Date().toISOString().slice(0,10);
+  document.getElementById("trkNiche").value = `${currentBatch._nicheLabel} - lote (${currentBatch._toolLabel})`;
+  document.getElementById("trkQty").value = currentBatch.length;
+  document.getElementById("trkStatus").value = "Gerado";
+  document.getElementById("painel").scrollIntoView({behavior:"smooth"});
+}
+
+/* ---------- Init ---------- */
+document.getElementById("trkDate").value = new Date().toISOString().slice(0,10);
+renderTracker();
+onNicheChange();
+// Restaurar token HF salvo
+const savedHF = localStorage.getItem("hfApiKey")||"";
+if(savedHF){
+  const inp=document.getElementById("hfKey");
+  const h=document.getElementById("hfKeyHelper");
+  if(inp) inp.value=savedHF;
+  if(h){ h.textContent="✓ Token salvo neste navegador."; h.style.color="var(--success)"; }
+}
+</script>
+</body>
+</html>
