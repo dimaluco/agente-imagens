@@ -254,8 +254,7 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
   <nav class="sections">
     <a href="#gerar">01 Gerar lote</a>
     <a href="#resultados">02 Resultados</a>
-    <a href="#checklist">03 Checklist de envio</a>
-    <a href="#painel">04 Painel de controle</a>
+    <a href="#painel">03 Painel de controle</a>
   </nav>
 </header>
 
@@ -404,56 +403,9 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
   </div>
 </section>
 
-<section id="checklist">
-  <h2><span class="num">03</span> Checklist de envio</h2>
-  <p class="desc">Antes de enviar cada imagem para Adobe Stock ou Shutterstock, confira estes pontos. Marcar errado (ou esquecer) pode causar rejeição — ou, em casos de uso indevido repetido, suspensão da conta.</p>
-  <div class="card">
-    <ul class="checklist">
-      <li>
-        <input type="checkbox" id="c1">
-        <span class="lbl"><b>Marcar "Created using generative AI tools"</b> — obrigatório em toda imagem feita com IA, sem exceção.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="cLang">
-        <span class="lbl"><b style="color:var(--accent)">⚠️ Campo "Idioma das palavras-chave" → selecionar English.</b> Sua conta está em Português (BR) na interface, mas os metadados das imagens precisam estar em inglês. Esse campo fica na tela de edição de cada arquivo — não confundir com o idioma da conta Adobe.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c2">
-        <span class="lbl"><b>Se a imagem tiver uma "pessoa" gerada por IA</b> que pareça real, marcar também "People and Property are fictional". Se não houver figuras humanas reconhecíveis, pode deixar desmarcado.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c3">
-        <span class="lbl"><b>Verificar resolução mínima de 4 megapixels (2000×2000px ou maior).</b> Se gerou pelo Firefly → já está OK, pode pular. Se gerou pela API Gemini → precisa de upscale antes do upload.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="cUpscale">
-        <span class="lbl"><b style="color:var(--accent);">🔍 Upscale obrigatório antes do upload:</b> abra o <a href="https://upscayl.org" target="_blank"><b>Upscayl</b></a> (<a href="https://github.com/upscayl/upscayl/releases" target="_blank" style="color:var(--accent-2)">baixar aqui</a> — gratuito, sem limite, roda offline) → selecione a imagem → escolha <b>4× de ampliação</b> → exporte. Aplicável a todas as ferramentas gratuitas de geração.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c4">
-        <span class="lbl"><b>Não usar nomes de marcas, pessoas reais, celebridades ou personagens fictícios</b> no prompt, título ou palavras-chave — nem mesmo indiretamente.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c5">
-        <span class="lbl"><b>Varie as proporções do lote</b> (quadrado, retrato, paisagem, vertical) — o agente já sugere isso, mas confirme antes de enviar.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c6">
-        <span class="lbl"><b>Evite enviar imagens muito parecidas em sequência.</b> Cada imagem deve ter potencial de licenciamento próprio — isso reduz o risco de o envio ser sinalizado como spam.</span>
-      </li>
-      <li>
-        <input type="checkbox" id="c7">
-        <span class="lbl"><b>Revise as palavras-chave geradas</b> antes de colar — remova qualquer termo que não represente fielmente a imagem final.</span>
-      </li>
-    </ul>
-  </div>
-  <div class="note" style="margin-top:14px;">
-    <b>Sobre a conta:</b> use sua conta antiga do Adobe Stock (a que já teve 1 venda) — manter o histórico é melhor do que começar do zero. O idioma da interface da conta (Português BR) é diferente do idioma das palavras-chave de cada arquivo — são campos separados. Os metadados gerados por este agente estão sempre em inglês. <b>Upscale:</b> instale o Upscayl uma vez e use ilimitadamente — é a solução definitiva para o problema de resolução.
-  </div>
-</section>
 
 <section id="painel">
-  <h2><span class="num">04</span> Painel de controle</h2>
+  <h2><span class="num">03</span> Painel de controle</h2>
   <p class="desc">Registre seus lotes para acompanhar o que já foi criado, enviado, aprovado ou vendido. Os dados ficam salvos neste navegador (não são enviados a lugar nenhum).</p>
 
   <div class="card">
@@ -780,21 +732,18 @@ function extractWords(text){
 function buildPromptText(item, tool){
   const cap = capFirst(item.subject);
   const [ratio, w, h, desc] = item.aspect;
-  const dimNote = `${ratio} (${w}x${h}px)`;
+  // Sufixo de qualidade e anatomia — aplicado a todos os prompts do Pollinations
+  const qualitySuffix = "perfect anatomy, perfect hands, correct fingers, five fingers, high quality, sharp, 8k, professional stock photo, no text, no watermark, no logo";
   if(tool==="aistudio"){
-    // Google AI Studio / Gemini Image — prefere prompts descritivos e diretos, sem colchetes
-    return `${cap}. Style: ${item.style}. Lighting: ${item.lighting}. Color palette: ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. High detail, professional quality, no text, no watermark, no logo.`;
+    // Pollinations.ai (Flux) — prompt direto e descritivo com qualidade máxima
+    return `${cap}. Style: ${item.style}. Lighting: ${item.lighting}. Color palette: ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. ${qualitySuffix}.`;
   } else if(tool==="designer"){
-    // Microsoft Designer (DALL-E 3) — responde bem a frases naturais e detalhadas
     return `${cap}, depicted in ${item.style}, with ${item.lighting}. Use a color palette of ${item.palette}. ${capFirst(item.composition)}. Aspect ratio ${ratio}. Highly detailed, clean professional image, no text or watermarks.`;
   } else if(tool==="firefly"){
-    // Adobe Firefly — suporta palavras-chave separadas por vírgula + modificadores
     return `${cap}, ${item.style}, ${item.lighting}, ${item.palette}, ${item.composition}, aspect ratio ${ratio}, ultra detail, photorealistic, no text, no watermark, commercially safe`;
   } else if(tool==="ideogram"){
-    // Ideogram 3.0 — forte em estilos artísticos, aceita prompts detalhados
     return `${cap}. Rendered as ${item.style}. ${capFirst(item.lighting)}. ${capFirst(item.palette)}. ${capFirst(item.composition)}. Image ratio ${ratio}. Ultra high quality, professional stock photo, no text, no watermark.`;
   } else {
-    // Genérico
     return `${cap}, ${item.style}, ${item.lighting}, ${item.palette}, ${item.composition}, aspect ratio ${ratio}, high detail, no text, no watermark.`;
   }
 }
@@ -1062,14 +1011,27 @@ async function gerarTodasImagens(){
       slotEl.innerHTML="";
       const img=document.createElement("img");
       img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);margin-bottom:8px;";
+      // Verificar resolução real ao carregar
+      img.onload = function(){
+        const realW = this.naturalWidth;
+        const realH = this.naturalHeight;
+        const mp = ((realW*realH)/1000000).toFixed(1);
+        const needsUpscale = (realW*realH) < 4000000;
+        const resNote = slotEl.querySelector('.res-note');
+        if(resNote){
+          resNote.textContent = `Resolução real: ${realW}×${realH}px (${mp}MP) ${needsUpscale ? "⚠️ Precisa de upscale 4× no Upscayl antes do upload" : "✅ Resolução suficiente para Adobe Stock"}`;
+          resNote.style.color = needsUpscale ? "var(--danger)" : "var(--success)";
+        }
+      };
       slotEl.appendChild(img);
       const a=document.createElement("a");
       a.href=objUrl; a.download=`img_lote_${item.id}.png`;
       a.className="dl-link"; a.textContent=`⬇ Baixar imagem ${item.id}`;
       slotEl.appendChild(a);
       const note=document.createElement("div");
+      note.className="res-note";
       note.style.cssText="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);";
-      note.textContent="✓ Gerada — faça upscale 4× no Upscayl antes do upload";
+      note.textContent="Verificando resolução...";
       slotEl.appendChild(note);
       statusEl.className="img-status ok";
       statusEl.textContent=`✓ Imagem ${item.id} pronta`;
@@ -1102,10 +1064,22 @@ async function regenarImagem(id){
     slotEl.innerHTML="";
     const img=document.createElement("img");
     img.src=objUrl; img.style.cssText="width:100%;border-radius:8px;display:block;border:1px solid var(--border);margin-bottom:8px;";
+    img.onload = function(){
+      const realW=this.naturalWidth, realH=this.naturalHeight;
+      const mp=((realW*realH)/1000000).toFixed(1);
+      const needsUpscale=(realW*realH)<4000000;
+      const resNote=slotEl.querySelector('.res-note');
+      if(resNote){ resNote.textContent=`Resolução real: ${realW}×${realH}px (${mp}MP) ${needsUpscale?"⚠️ Precisa de upscale 4× no Upscayl":"✅ Resolução suficiente"}`; resNote.style.color=needsUpscale?"var(--danger)":"var(--success)"; }
+    };
     slotEl.appendChild(img);
     const a=document.createElement("a");
     a.href=objUrl; a.download=`img_lote_${id}.png`; a.className="dl-link"; a.textContent=`⬇ Baixar imagem ${id}`;
     slotEl.appendChild(a);
+    const note=document.createElement("div");
+    note.className="res-note";
+    note.style.cssText="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--font-mono);";
+    note.textContent="Verificando resolução...";
+    slotEl.appendChild(note);
     statusEl.className="img-status ok"; statusEl.textContent=`✓ Imagem ${id} pronta`;
   } catch(e){
     statusEl.className="img-status err"; statusEl.textContent=`✗ ${e.message}`;
