@@ -37,19 +37,19 @@ header{
   padding:28px 20px 22px;
   background:linear-gradient(180deg,#1a1d24,#14161b);
 }
-header .wrap{max-width:880px;margin:0 auto;}
+header .wrap{max-width:1400px;margin:0 auto;}
 h1{
   font-family:var(--font-display);
-  font-size:28px;
+  font-size:32px;
   margin:0 0 6px;
   letter-spacing:0.5px;
 }
 h1 span{color:var(--accent);}
-header p{margin:0;color:var(--text-muted);font-size:14.5px;max-width:640px;}
+header p{margin:0;color:var(--text-muted);font-size:14.5px;max-width:800px;}
 nav.sections{
-  max-width:880px;margin:18px auto 0;
+  max-width:1400px;margin:18px auto 0;
   display:flex;flex-wrap:wrap;gap:8px;
-  padding:0 20px;
+  padding:0 40px;
 }
 nav.sections a{
   font-family:var(--font-mono);
@@ -62,12 +62,12 @@ nav.sections a{
   transition:all .15s ease;
 }
 nav.sections a:hover{border-color:var(--accent);color:var(--accent);}
-main{max-width:880px;margin:0 auto;padding:0 20px 80px;}
-section{padding:36px 0;border-bottom:1px solid var(--border);}
+main{max-width:1400px;margin:0 auto;padding:0 40px 80px;}
+section{padding:40px 0;border-bottom:1px solid var(--border);}
 section:last-child{border-bottom:none;}
 section h2{
   font-family:var(--font-display);
-  font-size:20px;
+  font-size:22px;
   margin:0 0 4px;
   display:flex;align-items:center;gap:10px;
 }
@@ -79,18 +79,23 @@ section h2 .num{
   border-radius:6px;
   padding:2px 7px;
 }
-section .desc{color:var(--text-muted);font-size:14px;margin:6px 0 22px;max-width:640px;}
+section .desc{color:var(--text-muted);font-size:14px;margin:6px 0 22px;max-width:800px;}
 .card{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:20px;
+  padding:24px;
 }
-.grid{display:grid;gap:14px;}
+.grid{display:grid;gap:16px;}
 .grid.cols-2{grid-template-columns:1fr 1fr;}
 .grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
-@media (max-width:680px){
-  .grid.cols-2,.grid.cols-3{grid-template-columns:1fr;}
+.grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media (max-width:900px){
+  .grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:600px){
+  .grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr;}
+  main{padding:0 16px 60px;}
 }
 label{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:6px;font-weight:500;}
 select,input[type=number],input[type=date],input[type=text],textarea{
@@ -276,7 +281,7 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
       <div class="field">
         <label for="toolSelect">Ferramenta de geração</label>
         <select id="toolSelect">
-          <option value="aistudio">Hugging Face (SDXL) — automático via API · recomendado</option>
+          <option value="aistudio">Pollinations.ai (Flux) — automático via API · gratuito · sem limite · recomendado</option>
           <option value="designer">Microsoft Designer — ~15 imagens/mês · manual</option>
           <option value="ideogram">Ideogram 3.0 — 10 imagens/dia · manual</option>
           <option value="firefly">Adobe Firefly — 5 imagens/dia · manual</option>
@@ -352,38 +357,36 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
     <div style="display:grid;gap:10px;font-size:13px;">
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">1</span>
-        <div><b style="color:var(--text)">Gere o lote</b> aqui no agente → copie o prompt de cada imagem individualmente</div>
+        <div><b style="color:var(--text)">Gere o lote</b> aqui no agente → escolha o nicho e quantidade</div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">2</span>
-        <div><b style="color:var(--text)">Cole no Microsoft Designer</b> (<a href="https://designer.microsoft.com" target="_blank">designer.microsoft.com</a>) — melhor limite gratuito (~15/dia) · Gere e baixe o PNG</div>
+        <div><b style="color:var(--text)">Clique em "⚡ Gerar todas as imagens"</b> — o Pollinations.ai gera automaticamente, sem cadastro, sem limite diário, modelo Flux</div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">3</span>
-        <div><b style="color:var(--text)">Faça upscale 4×</b> no <a href="https://upscayl.org" target="_blank">Upscayl</a> — app gratuito, open source, sem limite de imagens, sem conta, roda offline no seu computador · <a href="https://github.com/upscayl/upscayl/releases" target="_blank" style="color:var(--accent-2);">Baixar Upscayl →</a></div>
+        <div><b style="color:var(--text)">Baixe cada imagem</b> e faça upscale 4× no <a href="https://upscayl.org" target="_blank">Upscayl</a> — gratuito, ilimitado, offline · <a href="https://github.com/upscayl/upscayl/releases" target="_blank" style="color:var(--accent-2);">Baixar Upscayl →</a></div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-family:var(--font-mono);font-size:18px;color:var(--accent);flex-shrink:0;">4</span>
-        <div><b style="color:var(--text)">Faça upload no Adobe Stock</b> — cole título, descrição e palavras-chave gerados aqui · Idioma: English · Marque "AI generated"</div>
+        <div><b style="color:var(--text)">Faça upload no Adobe Stock</b> — cole título, descrição e palavras-chave gerados aqui · Idioma: <b>English</b> · Marque "AI generated"</div>
       </div>
       <div style="background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-top:2px;">
-        Esgotou o limite diário do Designer? Complete com <b style="color:var(--text)">Ideogram</b> (10/dia) ou <b style="color:var(--text)">Firefly</b> (5/dia). Com as 3 ferramentas juntas: até ~30 imagens/dia.
+        <b style="color:var(--success)">✅ Pollinations.ai confirmado:</b> gratuito, sem limite diário, sem cadastro, modelo Flux — funciona direto no navegador em qualquer rede.
       </div>
     </div>
   </div>
   <div class="card" style="margin-top:16px;border-color:var(--accent);">
-    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — Pollinations.ai (sem cadastro, sem token)</div>
-    <p style="font-size:13px;color:var(--text-muted);margin:0 0 8px;">A geração de imagens acontece automaticamente ao clicar no botão na seção 02. Não precisa de conta, token ou cadastro — funciona em qualquer rede, direto do navegador.</p>
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — Pollinations.ai (gratuito · sem cadastro · sem limite)</div>
     <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--success);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);">
-      <b style="color:var(--success);">✅ Sem configuração necessária</b> — clique em "Gerar lote" na seção acima e depois em "⚡ Gerar todas as imagens" na seção 02. As imagens aparecem direto no agente com botão de download.<br>
-      <span style="font-size:11.5px;margin-top:4px;display:block;">Resolução de saída: de acordo com a proporção do lote · Após Upscayl 4× passa no Adobe Stock com folga.</span>
+      <b style="color:var(--success);">✅ Nenhuma configuração necessária</b> — gere o lote acima e clique em "⚡ Gerar todas as imagens" na seção 02. As imagens aparecem direto aqui com botão de download. Modelo: <b style="color:var(--text)">Flux</b> · Sem limite diário · Funciona em qualquer rede.
     </div>
   </div>
 </section>
 
 <section id="resultados">
   <h2><span class="num">02</span> Resultados</h2>
-  <p class="desc">Clique em <b>"Gerar todas as imagens"</b> para criar o lote automaticamente via Hugging Face. Cada imagem aparece aqui com botão de download — depois é só rodar no Upscayl e fazer o upload.</p>
+  <p class="desc">Clique em <b>"⚡ Gerar todas as imagens"</b> para criar o lote automaticamente via Pollinations.ai. Cada imagem aparece aqui com botão de download — depois é só rodar no Upscayl e fazer o upload.</p>
   <div id="resultsArea">
     <div class="card" style="text-align:center;color:var(--text-muted);padding:32px;">
       Nenhum lote gerado ainda. Use a seção 01 acima.
@@ -1020,7 +1023,7 @@ function toggleHFKey(){
 async function callPollinationsImage(prompt, width, height){
   const encodedPrompt = encodeURIComponent(prompt);
   const seed = Math.floor(Math.random() * 999999);
-  const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
+  const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux`;
 
   const resp = await fetch(url, { method:"GET" });
   if(!resp.ok) throw new Error(`Erro HTTP ${resp.status} — tente novamente`);
