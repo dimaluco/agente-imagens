@@ -376,10 +376,26 @@ input[type=password]:focus{outline:2px solid var(--accent-2);outline-offset:1px;
     </div>
   </div>
   <div class="card" style="margin-top:16px;border-color:var(--accent);">
-    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — Pollinations.ai (gratuito · sem cadastro · sem limite)</div>
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--success);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);">
-      <b style="color:var(--success);">✅ Nenhuma configuração necessária</b> — gere o lote acima e clique em "⚡ Gerar todas as imagens" na seção 02. As imagens aparecem direto aqui com botão de download. Modelo: <b style="color:var(--text)">Flux</b> · Sem limite diário · Funciona em qualquer rede.
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;">⚡ Geração automática — Pollinations.ai</div>
+    <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;">A Pollinations atualizou a API — agora pede uma chave gratuita. Sem chave, o limite é de apenas 1 imagem por hora. Com a chave abaixo (gratuita, sem limite), o lote inteiro gera de uma vez.</p>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent-2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+      <b style="color:var(--text);">Como obter a chave gratuita (1 minuto):</b><br>
+      1. Acesse <a href="https://enter.pollinations.ai" target="_blank" style="color:var(--accent);">enter.pollinations.ai</a> e entre com sua conta GitHub<br>
+      2. Clique em <b style="color:var(--text);">"Create New API Key"</b><br>
+      3. Escolha o tipo <b style="color:var(--text);">Secret Key (sk_)</b> — sem limite de taxa<br>
+      4. Copie a chave (começa com <b style="color:var(--text);">sk_...</b>) e cole abaixo<br>
+      <span style="color:var(--text-muted);font-size:11.5px;margin-top:4px;display:block;">A chave fica salva só neste navegador — nunca aparece no código público do GitHub.</span>
     </div>
+    <div class="grid cols-2">
+      <div class="field" style="margin-bottom:0;">
+        <label for="pollKey">Chave Pollinations (sk_...)</label>
+        <input type="password" id="pollKey" placeholder="sk_..." oninput="salvarChavePoll(this.value)">
+      </div>
+      <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn secondary small" onclick="togglePollKey()" style="height:42px;">Mostrar/Ocultar</button>
+      </div>
+    </div>
+    <div class="helper" id="pollKeyHelper" style="margin-top:8px;"></div>
   </div>
 </section>
 
@@ -968,6 +984,17 @@ function toggleHFKey(){
   if(inp) inp.type = inp.type==="password" ? "text" : "password";
 }
 
+/* ---------- API Key — Pollinations ---------- */
+function salvarChavePoll(val){
+  localStorage.setItem("pollinationsKey", val.trim());
+  const h = document.getElementById("pollKeyHelper");
+  if(h){ h.textContent = val.trim() ? "✓ Chave salva neste navegador." : ""; h.style.color="var(--success)"; }
+}
+function togglePollKey(){
+  const inp = document.getElementById("pollKey");
+  if(inp) inp.type = inp.type==="password" ? "text" : "password";
+}
+
 /* ---------- Remove watermark via crop no Canvas ---------- */
 function cropWatermark(objectUrl){
   return new Promise((resolve, reject)=>{
@@ -994,9 +1021,12 @@ function cropWatermark(objectUrl){
 async function callPollinationsImage(prompt, width, height){
   const encodedPrompt = encodeURIComponent(prompt);
   const seed = Math.floor(Math.random() * 999999);
-  const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux`;
+  const apiKey = (localStorage.getItem("pollinationsKey")||"").trim();
+  let url = `https://gen.pollinations.ai/image/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&model=flux`;
+  if(apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
 
   const resp = await fetch(url, { method:"GET" });
+  if(resp.status===429) throw new Error("Limite de taxa atingido — sem chave sk_ o limite é 1 imagem/hora. Cole sua chave gratuita na seção 01.");
   if(!resp.ok) throw new Error(`Erro HTTP ${resp.status} — tente novamente`);
   const blob = await resp.blob();
   if(!blob.type.startsWith("image/")) throw new Error("Resposta inesperada — tente novamente");
@@ -1206,6 +1236,14 @@ if(savedHF){
   const h=document.getElementById("hfKeyHelper");
   if(inp) inp.value=savedHF;
   if(h){ h.textContent="✓ Token salvo neste navegador."; h.style.color="var(--success)"; }
+}
+// Restaurar chave Pollinations salva
+const savedPoll = localStorage.getItem("pollinationsKey")||"";
+if(savedPoll){
+  const inp=document.getElementById("pollKey");
+  const h=document.getElementById("pollKeyHelper");
+  if(inp) inp.value=savedPoll;
+  if(h){ h.textContent="✓ Chave salva neste navegador."; h.style.color="var(--success)"; }
 }
 </script>
 </body>
